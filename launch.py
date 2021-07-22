@@ -2,6 +2,9 @@ import pandas as pd
 import seaborn
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import metrics
+
 
 df = pd.read_csv("data/data_banknote_authentication.txt")
 
@@ -20,13 +23,13 @@ def color_label(row):
 df["Color"] = df.apply(lambda row: color_label(row), axis=1)
 
 # Computing mean and standard deviation for each Color (+ and -)
-green_mean = round(df.loc[df["Color"] == "+"].mean(0), 2)
-red_mean = round(df.loc[df["Color"] == "-"].mean(0), 2)
-mean = round(df.mean(0), 2)
+green_mean = round(df.loc[df["Color"] == "+"].mean(0, numeric_only=True), 2)
+red_mean = round(df.loc[df["Color"] == "-"].mean(0, numeric_only=True), 2)
+mean = round(df.mean(0, numeric_only=True), 2)
 
-green_std = round(df.loc[df["Color"] == "+"].std(0), 2)
-red_std = round(df.loc[df["Color"] == "-"].std(0), 2)
-std = round(df.std(0), 2)
+green_std = round(df.loc[df["Color"] == "+"].std(0, numeric_only=True), 2)
+red_std = round(df.loc[df["Color"] == "-"].std(0, numeric_only=True), 2)
+std = round(df.std(0, numeric_only=True), 2)
 
 table = pd.DataFrame(
     [
@@ -72,6 +75,7 @@ print("=====")
 # ====================
 # Question #2
 # ====================
+
 x_train, x_test = np.split(df.sample(frac=1), 2)
 
 x_train_green = x_train.loc[x_train["Color"] == "+"]
@@ -116,7 +120,55 @@ tnr = tn / (tn + fp)
 accuracy = round(((tp + tn) / len(x_test)) * 100, 2)
 
 accuracy_table = pd.DataFrame(
-    {"tp": [tp], "fp": fp, "tn": [tn], "fn": [fn], "accuracy": accuracy, "tpr": [tpr], "tnr": [tnr]}
+    {
+        "tp": [tp],
+        "fp": fp,
+        "tn": [tn],
+        "fn": [fn],
+        "accuracy": accuracy,
+        "tpr": [tpr],
+        "tnr": [tnr],
+    }
 )
 
 print(accuracy_table)
+
+# ====================
+# Question #3
+# ====================
+
+print("============")
+print("Question 3")
+print("============")
+
+y_train = x_train["class"].values.tolist()
+x_train = x_train.drop(["Color", "class"], axis=1)
+
+y_test = x_test["class"].values.tolist()
+x_test = x_test.drop(["Color", "class"], axis=1)
+
+k = [3, 5, 7, 9, 11]
+accuracy_table = []
+
+for num in k:
+
+    knn = KNeighborsClassifier(n_neighbors=num)
+    knn.fit(x_train, y_train)
+    y_pred = knn.predict(x_test)
+    accuracy = metrics.accuracy_score(y_test, y_pred)
+    accuracy_table.append(accuracy)
+
+    print("k=" + str(num) + " - Accuracy:" + str(accuracy))
+
+max_value = max(accuracy_table)
+max_index = accuracy_table.index(max_value) 
+print(max_index)
+
+print(accuracy_table)
+plt.clf()
+plt.plot(accuracy_table)
+plt.xlabel("K")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()
+
