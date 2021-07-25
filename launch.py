@@ -303,3 +303,18 @@ if y_pred[0] == 0:
 else:
     print("My Bill is Fake...")
 
+# ====================
+# Question #6
+# ====================
+
+print("============")
+print("Question 6")
+print("============")
+
+columns = ["f1", "f2", "f3", "f4"]
+
+for f in columns:
+    clf = LogisticRegression(random_state=0).fit(x_train.drop([f], axis=1), y_train)
+    y_pred = knn.predict(x_test.drop([f], axis=1))
+    accuracy = metrics.accuracy_score(y_test, y_pred)
+    print("Accuracy Without " + f + ": " + str(accuracy))
