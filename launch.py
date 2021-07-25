@@ -1,3 +1,11 @@
+"""
+Jake Stephens
+Class: CS 677 - Spring 2
+Date: 7/27/2021
+Homework #3
+Comparing knn classifier to linear regression on bank note data.
+"""
+
 import pandas as pd
 import seaborn
 import matplotlib.pyplot as plt
