@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import metrics
+from sklearn.model_selection import train_test_split
 
 
 df = pd.read_csv("data/data_banknote_authentication.txt")
@@ -141,11 +142,10 @@ print("============")
 print("Question 3")
 print("============")
 
-y_train = x_train["class"].values.tolist()
-x_train = x_train.drop(["Color", "class"], axis=1)
+y = df["class"].values.tolist()
+x = df.drop(["Color", "class"], axis=1)
 
-y_test = x_test["class"].values.tolist()
-x_test = x_test.drop(["Color", "class"], axis=1)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5, random_state=7, shuffle=True)
 
 k = [3, 5, 7, 9, 11]
 accuracy_table = []
@@ -169,6 +169,5 @@ plt.clf()
 plt.plot(accuracy_table)
 plt.xlabel("K")
 plt.ylabel("Accuracy")
-plt.legend()
 plt.show()
 
