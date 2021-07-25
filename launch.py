@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 
 
 df = pd.read_csv("data/data_banknote_authentication.txt")
@@ -145,7 +146,9 @@ print("============")
 y = df["class"].values.tolist()
 x = df.drop(["Color", "class"], axis=1)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5, random_state=7, shuffle=True)
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.5, random_state=1, shuffle=True
+)
 
 k = [3, 5, 7, 9, 11]
 accuracy_table = []
@@ -161,13 +164,142 @@ for num in k:
     print("k=" + str(num) + " - Accuracy:" + str(accuracy))
 
 max_value = max(accuracy_table)
-max_index = accuracy_table.index(max_value) 
-print(max_index)
-
+max_index = accuracy_table.index(max_value)
 print(accuracy_table)
+print("=======")
 plt.clf()
 plt.plot(accuracy_table)
 plt.xlabel("K")
 plt.ylabel("Accuracy")
-plt.show()
+# plt.show()
+print(
+    "Best value for K is k="
+    + str(k[max_index])
+    + " with a accuracy of "
+    + str(accuracy_table[max_index])
+)
+
+knn = KNeighborsClassifier(n_neighbors=k[max_index])
+knn.fit(x_train, y_train)
+y_pred = knn.predict(x_test)
+index = 0
+tp = 0
+fp = 0
+tn = 0
+fn = 0
+
+for item in y_pred:
+    if item == 0:
+        if item == y_test[index]:
+            tp += 1
+        else:
+            fp += 1
+    else:
+        if item == y_test[index]:
+            tn += 1
+        else:
+            fn += 1
+    index += 1
+tpr = tp / (tp + fn)
+tnr = tn / (tn + fp)
+
+accuracy_table = pd.DataFrame(
+    {
+        "tp": [tp],
+        "fp": fp,
+        "tn": [tn],
+        "fn": [fn],
+        "accuracy": accuracy_table[max_index],
+        "tpr": [tpr],
+        "tnr": [tnr],
+    }
+)
+
+print(accuracy_table)
+
+# BU ID Classifier: 1161
+
+knn = KNeighborsClassifier(n_neighbors=k[max_index])
+knn.fit(x_train, y_train)
+bu_id_bill = pd.DataFrame([[1, 1, 6, 1]], columns=["f1", "f2", "f3", "f4"])
+y_pred = knn.predict(bu_id_bill)
+print("The predicted value for my BU ID Bill is: " + str(y_pred))
+if y_pred[0] == 0:
+    print("My Bill is Real!!!!")
+else:
+    print("My Bill is Fake...")
+
+# ====================
+# Question #4
+# ====================
+
+print("============")
+print("Question 4")
+print("============")
+
+columns = ["f1", "f2", "f3", "f4"]
+
+for f in columns:
+    knn = KNeighborsClassifier(n_neighbors=k[max_index])
+    knn.fit(x_train.drop([f], axis=1), y_train)
+    y_pred = knn.predict(x_test.drop([f], axis=1))
+    accuracy = metrics.accuracy_score(y_test, y_pred)
+    print("Accuracy Without " + f + ": " + str(accuracy))
+
+# ====================
+# Question #5
+# ====================
+
+print("============")
+print("Question 5")
+print("============")
+
+clf = LogisticRegression(random_state=0).fit(x_train, y_train)
+y_pred = clf.predict(x_test)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+
+index = 0
+tp = 0
+fp = 0
+tn = 0
+fn = 0
+
+for item in y_pred:
+    if item == 0:
+        if item == y_test[index]:
+            tp += 1
+        else:
+            fp += 1
+    else:
+        if item == y_test[index]:
+            tn += 1
+        else:
+            fn += 1
+    index += 1
+tpr = tp / (tp + fn)
+tnr = tn / (tn + fp)
+
+accuracy_table = pd.DataFrame(
+    {
+        "tp": [tp],
+        "fp": fp,
+        "tn": [tn],
+        "fn": [fn],
+        "accuracy": [accuracy],
+        "tpr": [tpr],
+        "tnr": [tnr],
+    }
+)
+
+print(accuracy_table)
+
+# BU ID Classifier: 1161
+
+clf = LogisticRegression(random_state=0).fit(x_train, y_train)
+y_pred = clf.predict(bu_id_bill)
+print("The predicted value for my BU ID Bill is: " + str(y_pred))
+if y_pred[0] == 0:
+    print("My Bill is Real!!!!")
+else:
+    print("My Bill is Fake...")
 
